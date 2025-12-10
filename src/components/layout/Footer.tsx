@@ -60,7 +60,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-primary-foreground/80">
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-secondary" />
-                <span>+233 20 123 4567</span>
+                <span>+233 201629359</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-secondary" />
@@ -75,7 +75,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-primary-foreground/60">
-          <p>© 2024 FarmConnect Ghana. All rights reserved.</p>
+          <p>© 2025 FarmConnect Ghana. All rights reserved.</p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-secondary transition-colors">Terms of Service</Link>

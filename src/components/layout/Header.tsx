@@ -1,16 +1,48 @@
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X, User, Leaf, Search } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingCart, Menu, X, User, Leaf, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCart } from "@/store/cart";
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/store/cart";
+import { useAuth } from "@/store/auth";
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { getTotalItems } = useCart();
+  const { isLoggedIn, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
+
+  const getDashboardPath = (role?: string) => {
+    switch (role) {
+      case "admin":
+        return "/admin";
+      case "farmer":
+        return "/dashboard";
+      case "buyer":
+        return "/buyer";
+      case "delivery":
+        return "/delivery";
+      case "warehouse":
+        return "/warehouse";
+      default:
+        return "/";
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -62,32 +94,64 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <Link to="/cart" className="relative">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <Badge
-                  variant="accent"
-                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-accent text-accent-foreground"
-                >
-                  {totalItems}
-                </Badge>
-              )}
-            </Button>
-          </Link>
+          {user?.role === "buyer" && (
+            <Link to="/cart" className="relative">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge
+                    variant="accent"
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-accent text-accent-foreground"
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+          )}
 
-          <Link to="/auth" className="hidden sm:block">
-            <Button variant="outline" size="sm">
-              <User className="h-4 w-4 mr-2" />
-              Sign In
-            </Button>
-          </Link>
+          {isLoggedIn && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="text-sm font-medium">{user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium text-foreground">{user.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to={getDashboardPath(user.role)}>
+                    Go to Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/auth" className="hidden sm:block">
+                <Button variant="outline" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
 
-          <Link to="/auth?signup=true" className="hidden sm:block">
-            <Button variant="hero" size="sm">
-              Get Started
-            </Button>
-          </Link>
+              <Link to="/auth?signup=true" className="hidden sm:block">
+                <Button variant="hero" size="sm">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu Toggle */}
           <Button
@@ -126,18 +190,37 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <div className="flex gap-3 pt-4 border-t border-border">
-              <Link to="/auth" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  Sign In
-                </Button>
-              </Link>
-              <Link to="/auth?signup=true" className="flex-1">
-                <Button variant="hero" className="w-full">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
+            {isLoggedIn && user && (
+              <>
+                <div className="py-4 border-t border-border">
+                  <p className="font-medium text-foreground mb-1">{user.name}</p>
+                  <p className="text-sm text-muted-foreground capitalize mb-3">{user.role}</p>
+                  <Link to={getDashboardPath(user.role)} onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Button variant="outline" className="w-full mb-2">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              </>
+            )}
+            {!isLoggedIn && (
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Link to="/auth" className="flex-1">
+                  <Button variant="outline" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/auth?signup=true" className="flex-1">
+                  <Button variant="hero" className="w-full">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       )}

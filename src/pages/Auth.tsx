@@ -5,29 +5,82 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Leaf, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/store/auth";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { login, staffLogin } = useAuth();
   const isSignup = searchParams.get("signup") === "true";
   const [mode, setMode] = useState<"signin" | "signup">(isSignup ? "signup" : "signin");
+  const [loginType, setLoginType] = useState<"user" | "staff">("user");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
+  const getDashboardPath = (role: string) => {
+    switch (role) {
+      case "admin":
+        return "/admin";
+      case "farmer":
+        return "/dashboard";
+      case "buyer":
+        return "/buyer";
+      case "delivery":
+        return "/delivery";
+      case "warehouse":
+        return "/warehouse";
+      default:
+        return "/";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast.success(mode === "signin" ? "Welcome back!" : "Account created successfully!", {
-      description: "You can now access your dashboard.",
-    });
-    
-    setLoading(false);
+
+    try {
+      let success = false;
+
+      if (mode === "signin") {
+        if (loginType === "staff") {
+          success = await staffLogin(email, password);
+        } else {
+          success = await login(email, password);
+        }
+      } else {
+        success = await login(email, password);
+      }
+
+      if (success) {
+        toast.success(mode === "signin" ? "Welcome back!" : "Account created successfully!", {
+          description: "You can now access your dashboard.",
+        });
+
+        // Get the user to determine dashboard path
+        const user = useAuth.getState().user;
+        if (user) {
+          setTimeout(() => {
+            navigate(getDashboardPath(user.role));
+          }, 500);
+        }
+      } else {
+        toast.error("Invalid credentials", {
+          description: "Please check your email and password.",
+        });
+      }
+    } catch (error) {
+      toast.error("Sign in failed", {
+        description: "Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,6 +106,54 @@ const Auth = () => {
               </p>
             </div>
 
+            {/* Login Type Tabs - Sign In Only */}
+            {mode === "signin" && (
+              <div className="mb-6 flex gap-2 border border-border rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginType("user")}
+                  className={`flex-1 py-2 px-3 rounded font-medium transition-colors ${
+                    loginType === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  User Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginType("staff")}
+                  className={`flex-1 py-2 px-3 rounded font-medium transition-colors ${
+                    loginType === "staff"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Staff Login
+                </button>
+              </div>
+            )}
+
+            {/* Demo Credentials Notice */}
+            {mode === "signin" && (
+              <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+                <strong>Demo Credentials:</strong>
+                {loginType === "user" ? (
+                  <ul className="mt-2 space-y-1 font-mono text-xs">
+                    <li>Admin: admin@test.com / admin123</li>
+                    <li>Farmer: farmer@test.com / farmer123</li>
+                    <li>Buyer: buyer@test.com / buyer123</li>
+                    <li>Delivery: delivery@test.com / delivery123</li>
+                    <li>Warehouse: warehouse@test.com / warehouse123</li>
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-xs">
+                    Use the credentials assigned by the admin through the Staff Management page.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "signup" && (
@@ -65,6 +166,8 @@ const Auth = () => {
                       type="text"
                       placeholder="Enter your full name"
                       className="pl-10"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       required
                     />
                   </div>
@@ -80,6 +183,8 @@ const Auth = () => {
                     type="email"
                     placeholder="Enter your email"
                     className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -104,6 +209,8 @@ const Auth = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     className="pl-10 pr-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <button

@@ -48,13 +48,13 @@ const stats = [
 
 const team = [
   {
-    name: "Kwame Osei",
+    name: "Clement Kojo Prempeh",
     role: "Founder & CEO",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
     bio: "Former agricultural economist with 15 years of experience in Ghana's farming sector.",
   },
   {
-    name: "Ama Serwaa",
+    name: "NEZER",
     role: "Chief Operations Officer",
     image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&h=300&fit=crop",
     bio: "Supply chain expert who has built logistics networks across West Africa.",

@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/users", label: "User Management", icon: Users },
+  { href: "/admin/staff", label: "Staff Management", icon: Users },
   { href: "/admin/approvals", label: "Product Approvals", icon: Package },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
