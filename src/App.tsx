@@ -12,6 +12,8 @@ import Cart from "./pages/Cart";
 import Auth from "./pages/Auth";
 import Farmers from "./pages/Farmers";
 import NotFound from "./pages/NotFound";
+import FarmerVerification from "./pages/FarmerVerification";
+import FarmerVerificationPending from "./pages/FarmerVerificationPending";
 // Farmer Dashboard
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import DashboardProducts from "./pages/dashboard/DashboardProducts";
@@ -24,6 +26,10 @@ import AdminOverview from "./pages/admin/AdminOverview";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminStaff from "./pages/admin/AdminStaff";
 import AdminApprovals from "./pages/admin/AdminApprovals";
+import AdminFarmers from "./pages/admin/AdminFarmers";
+import AdminDelivery from "./pages/admin/AdminDelivery";
+import AdminWarehouse from "./pages/admin/AdminWarehouse";
+import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -65,6 +71,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/farmers" element={<Farmers />} />
           <Route path="/about" element={<About />} />
+          <Route path="/farmer-verification" element={<ProtectedRoute requiredRole="farmer"><FarmerVerification /></ProtectedRoute>} />
+          <Route path="/farmer-verification-pending" element={<ProtectedRoute requiredRole="farmer"><FarmerVerificationPending /></ProtectedRoute>} />
           {/* Farmer Dashboard Routes */}
           <Route path="/dashboard" element={<ProtectedRoute requiredRole="farmer"><DashboardOverview /></ProtectedRoute>} />
           <Route path="/dashboard/products" element={<ProtectedRoute requiredRole="farmer"><DashboardProducts /></ProtectedRoute>} />
@@ -77,6 +85,10 @@ const App = () => (
           <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><AdminUsers /></ProtectedRoute>} />
           <Route path="/admin/staff" element={<ProtectedRoute requiredRole="admin"><AdminStaff /></ProtectedRoute>} />
           <Route path="/admin/approvals" element={<ProtectedRoute requiredRole="admin"><AdminApprovals /></ProtectedRoute>} />
+          <Route path="/admin/farmers" element={<ProtectedRoute requiredRole="admin"><AdminFarmers /></ProtectedRoute>} />
+          <Route path="/admin/delivery" element={<ProtectedRoute requiredRole="admin"><AdminDelivery /></ProtectedRoute>} />
+          <Route path="/admin/warehouse" element={<ProtectedRoute requiredRole="admin"><AdminWarehouse /></ProtectedRoute>} />
+          <Route path="/admin/financial" element={<ProtectedRoute requiredRole="admin"><AdminFinancial /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute requiredRole="admin"><AdminAnalytics /></ProtectedRoute>} />
           <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRole="admin"><AdminAuditLogs /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />

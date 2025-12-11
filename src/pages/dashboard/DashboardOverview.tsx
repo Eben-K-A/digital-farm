@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { dashboardStats, mockFarmerOrders, mockEarnings } from "@/data/farmer-data";
-import { Package, ShoppingCart, Wallet, Star, ArrowRight, Eye } from "lucide-react";
+import { Package, ShoppingCart, Wallet, Star, ArrowRight, Eye, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useFarmerVerification } from "@/store/farmer-verification";
+import { useAuth } from "@/store/auth";
 import {
   AreaChart,
   Area,
@@ -25,6 +27,12 @@ const statusColors: Record<string, string> = {
 };
 
 export default function DashboardOverview() {
+  const { user } = useAuth();
+  const { getVerification } = useFarmerVerification();
+  const verification = getVerification(user?.id || "");
+  const isVerified = verification?.status === "approved";
+  const verificationPending = verification?.status === "pending";
+
   const recentOrders = mockFarmerOrders.slice(0, 4);
 
   return (
@@ -32,6 +40,34 @@ export default function DashboardOverview() {
       title="Dashboard"
       description="Welcome back, Kofi! Here's what's happening with your farm."
     >
+      {/* Verification Status Alert */}
+      {!isVerified && (
+        <Card variant="elevated" className={`mb-6 border-l-4 ${verificationPending ? "border-l-amber-500 bg-amber-50" : "border-l-orange-500 bg-orange-50"}`}>
+          <CardContent className="pt-6">
+            <div className="flex gap-4 items-start">
+              <AlertCircle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${verificationPending ? "text-amber-600" : "text-orange-600"}`} />
+              <div className="flex-1">
+                <h3 className={`font-medium ${verificationPending ? "text-amber-900" : "text-orange-900"}`}>
+                  {verificationPending ? "Verification Under Review" : "Farm Verification Required"}
+                </h3>
+                <p className={`text-sm mt-1 ${verificationPending ? "text-amber-800" : "text-orange-800"}`}>
+                  {verificationPending
+                    ? "Your verification is being reviewed by our team. You'll be notified once approved."
+                    : "Complete your farm verification to start listing products and receiving orders."}
+                </p>
+                {!verificationPending && (
+                  <Link to="/farmer-verification" className="inline-block mt-3">
+                    <Button size="sm" variant="default" className="gap-2">
+                      Complete Verification
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard

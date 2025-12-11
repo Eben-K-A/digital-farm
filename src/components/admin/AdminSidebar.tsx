@@ -11,6 +11,9 @@ import {
   Leaf,
   ChevronLeft,
   ChevronRight,
+  Truck,
+  Warehouse,
+  DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -19,8 +22,12 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/users", label: "User Management", icon: Users },
+  { href: "/admin/farmers", label: "Farmer Management", icon: Leaf },
   { href: "/admin/staff", label: "Staff Management", icon: Users },
   { href: "/admin/approvals", label: "Product Approvals", icon: Package },
+  { href: "/admin/delivery", label: "Delivery Management", icon: Truck },
+  { href: "/admin/warehouse", label: "Warehouse Management", icon: Warehouse },
+  { href: "/admin/financial", label: "Financial Management", icon: DollarSign },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
   { href: "/admin/settings", label: "Settings", icon: Settings },

@@ -13,15 +13,15 @@ import { useAuth } from "@/store/auth";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, staffLogin } = useAuth();
+  const { login } = useAuth();
   const isSignup = searchParams.get("signup") === "true";
   const [mode, setMode] = useState<"signin" | "signup">(isSignup ? "signup" : "signin");
-  const [loginType, setLoginType] = useState<"user" | "staff">("user");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [userType, setUserType] = useState<"buyer" | "farmer" | null>(null);
 
   const getDashboardPath = (role: string) => {
     switch (role) {
@@ -42,20 +42,18 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (mode === "signup" && !userType) {
+      toast.error("Please select your account type", {
+        description: "Choose whether you're a Buyer or Farmer.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      let success = false;
-
-      if (mode === "signin") {
-        if (loginType === "staff") {
-          success = await staffLogin(email, password);
-        } else {
-          success = await login(email, password);
-        }
-      } else {
-        success = await login(email, password);
-      }
+      const success = await login(email, password);
 
       if (success) {
         toast.success(mode === "signin" ? "Welcome back!" : "Account created successfully!", {
@@ -66,12 +64,16 @@ const Auth = () => {
         const user = useAuth.getState().user;
         if (user) {
           setTimeout(() => {
-            navigate(getDashboardPath(user.role));
+            if (user.role === "farmer") {
+              navigate("/farmer-verification");
+            } else {
+              navigate(getDashboardPath(user.role));
+            }
           }, 500);
         }
       } else {
         toast.error("Invalid credentials", {
-          description: "Please check your email and password.",
+          description: "Please check your email and password. Use test credentials to sign in.",
         });
       }
     } catch (error) {
@@ -106,51 +108,17 @@ const Auth = () => {
               </p>
             </div>
 
-            {/* Login Type Tabs - Sign In Only */}
-            {mode === "signin" && (
-              <div className="mb-6 flex gap-2 border border-border rounded-lg p-1">
-                <button
-                  type="button"
-                  onClick={() => setLoginType("user")}
-                  className={`flex-1 py-2 px-3 rounded font-medium transition-colors ${
-                    loginType === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  User Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLoginType("staff")}
-                  className={`flex-1 py-2 px-3 rounded font-medium transition-colors ${
-                    loginType === "staff"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Staff Login
-                </button>
-              </div>
-            )}
-
             {/* Demo Credentials Notice */}
             {mode === "signin" && (
               <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
                 <strong>Demo Credentials:</strong>
-                {loginType === "user" ? (
-                  <ul className="mt-2 space-y-1 font-mono text-xs">
-                    <li>Admin: admin@test.com / admin123</li>
-                    <li>Farmer: farmer@test.com / farmer123</li>
-                    <li>Buyer: buyer@test.com / buyer123</li>
-                    <li>Delivery: delivery@test.com / delivery123</li>
-                    <li>Warehouse: warehouse@test.com / warehouse123</li>
-                  </ul>
-                ) : (
-                  <p className="mt-2 text-xs">
-                    Use the credentials assigned by the admin through the Staff Management page.
-                  </p>
-                )}
+                <ul className="mt-2 space-y-1 font-mono text-xs">
+                  <li>Admin: admin@test.com / admin123</li>
+                  <li>Farmer: farmer@test.com / farmer123</li>
+                  <li>Buyer: buyer@test.com / buyer123</li>
+                  <li>Delivery: delivery@test.com / delivery123</li>
+                  <li>Warehouse: warehouse@test.com / warehouse123</li>
+                </ul>
               </div>
             )}
 
@@ -231,11 +199,21 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="userType">I am a...</Label>
                   <div className="grid grid-cols-2 gap-3">
-                    <Button type="button" variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button
+                      type="button"
+                      variant={userType === "buyer" ? "default" : "outline"}
+                      className="h-auto py-4 flex-col gap-2"
+                      onClick={() => setUserType("buyer")}
+                    >
                       <span className="text-lg">🛒</span>
                       <span>Buyer</span>
                     </Button>
-                    <Button type="button" variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button
+                      type="button"
+                      variant={userType === "farmer" ? "default" : "outline"}
+                      className="h-auto py-4 flex-col gap-2"
+                      onClick={() => setUserType("farmer")}
+                    >
                       <span className="text-lg">🌾</span>
                       <span>Farmer</span>
                     </Button>

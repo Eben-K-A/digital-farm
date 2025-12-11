@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useStaff, type PermissionKey, type StaffRole } from './staff';
+import { useFarmerVerification } from './farmer-verification';
 
 export type UserRole = 'admin' | 'farmer' | 'buyer' | 'delivery' | 'warehouse' | 'staff';
 
