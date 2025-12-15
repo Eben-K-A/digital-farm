@@ -50,35 +50,89 @@ const Auth = () => {
       return;
     }
 
+    if (mode === "signup" && !name) {
+      toast.error("Please enter your full name", {
+        description: "Your name is required to create an account.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const { register, login: loginFn } = useAuth.getState();
+      let success = false;
 
-      if (success) {
-        toast.success(mode === "signin" ? "Welcome back!" : "Account created successfully!", {
-          description: "You can now access your dashboard.",
-        });
+      if (mode === "signup") {
+        // Parse name into first and last name
+        const nameParts = name.trim().split(/\s+/);
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || firstName;
 
-        // Get the user to determine dashboard path
-        const user = useAuth.getState().user;
-        if (user) {
+        success = await register(email, password, firstName, lastName, "", userType!);
+
+        if (success) {
+          toast.success("Account created successfully!", {
+            description: userType === "farmer"
+              ? "Redirecting to verification process..."
+              : "Redirecting to dashboard...",
+          });
+
+          // Clear form
+          setEmail("");
+          setPassword("");
+          setName("");
+          setUserType(null);
+
           setTimeout(() => {
-            if (user.role === "farmer") {
+            if (userType === "farmer") {
               navigate("/farmer-verification");
             } else {
-              navigate(getDashboardPath(user.role));
+              navigate("/buyer");
             }
           }, 500);
+        } else {
+          toast.error("Account creation failed", {
+            description: "Please check your information and try again.",
+          });
         }
       } else {
-        toast.error("Invalid credentials", {
-          description: "Please check your email and password. Use test credentials to sign in.",
-        });
+        // Sign in mode
+        success = await loginFn(email, password);
+
+        if (success) {
+          toast.success("Welcome back!", {
+            description: "You can now access your dashboard.",
+          });
+
+          // Get the user to determine dashboard path
+          const user = useAuth.getState().user;
+          if (user) {
+            setTimeout(() => {
+              if (user.role === "farmer") {
+                // Check if farmer is verified
+                if (user.verification_status === "approved") {
+                  navigate("/dashboard");
+                } else if (user.verification_status === "pending") {
+                  navigate("/farmer-verification-pending");
+                } else {
+                  navigate("/farmer-verification");
+                }
+              } else {
+                navigate(getDashboardPath(user.role));
+              }
+            }, 500);
+          }
+        } else {
+          toast.error("Invalid credentials", {
+            description: "Please check your email and password.",
+          });
+        }
       }
-    } catch (error) {
-      toast.error("Sign in failed", {
-        description: "Please try again.",
+    } catch (error: any) {
+      const errorMessage = error?.message || "An error occurred";
+      toast.error("Error", {
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
