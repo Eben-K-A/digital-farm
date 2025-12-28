@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "migrate": "node src/migrations/migrate.js"
+    "migrate": "node src/migrations/migrate.js",
+    "seed": "node src/migrations/seed.js"
   },
   "dependencies": {
     "express": "^4.18.2",

@@ -7,6 +7,16 @@ import { errorHandler, asyncHandler } from './middleware/errorHandler.js';
 // Import routes
 import authRoutes from './routes/auth.js';
 import verificationRoutes from './routes/verification.js';
+import productsRoutes from './routes/products.js';
+import usersRoutes from './routes/users.js';
+import cartRoutes from './routes/cart.js';
+import ordersRoutes from './routes/orders.js';
+import deliveryRoutes from './routes/delivery.js';
+import warehouseRoutes from './routes/warehouse.js';
+import adminRoutes from './routes/admin.js';
+import notificationRoutes from './routes/notifications.js';
+import paymentRoutes from './routes/payments.js';
+import reviewRoutes from './routes/reviews.js';
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +60,16 @@ app.get('/health/db', asyncHandler(async (req, res) => {
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/farmers/verify', verificationRoutes);
+app.use('/api/v1/products', productsRoutes);
+app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/orders', ordersRoutes);
+app.use('/api/v1/delivery', deliveryRoutes);
+app.use('/api/v1/warehouse', warehouseRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -66,19 +86,10 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, () => {
   console.log(`\n🚀 Server running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`📍 API Base URL: http://localhost:${PORT}/api/v1`);
-
-  // Test database connection
-  try {
-    const result = await pool.query('SELECT NOW()');
-    console.log('✅ Database connected:', result.rows[0].now);
-  } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
-    console.error('Make sure your DATABASE_URL is correct in .env file');
-  }
 });
 
 // Handle graceful shutdown
